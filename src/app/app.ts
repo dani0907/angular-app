@@ -1,12 +1,23 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Home } from './home/home';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
+  imports: [RouterOutlet,Home],
+  // templateUrl: './app.html',
+  // template:`<h1>Hello, {{title()}}</h1>`,
+  template:`<main>
+      <header class="brand-name">
+        <img class="brand-logo" src="/public/logo.svg" alt="logo" aria-hidden="true" />
+      </header>
+      <section class="content">
+        <app-home />
+      </section>
+    </main>`,
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly title = signal('first-app');
+  // protected readonly title = signal('World');
+  protected readonly title =signal("world");
 }

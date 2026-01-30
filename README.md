@@ -1,6 +1,6 @@
 # Angular First App
 
-We are going over the Angular.dev tutorial for building a houses for rent app. The tutorial is found at [https://angular.dev/tutorials/first-app](https://angular.dev/tutorials/first-app).
+We are going over the [Angular.dev tutorial](https://angular.dev/tutorials/first-app-tutorial) for building a houses for rent app.
 
 ## Running the App
 
@@ -14,10 +14,173 @@ ng serve
 
 ## Tutorial Section 1: Setup
 
-Recall, we need to have Node and Angular installed. Make sure to [install NodeJS](https://nodejs.org/en/download) if you havent's already. Then you can install the Angular CLI. The latest, which are using for this tutorial `21.1.2`/
+Recall, we need to have Node and Angular installed. Make sure to [install NodeJS](https://nodejs.org/en/download) if you haven't already. Then you can install the Angular CLI. The lastest, which we are using for this tutorial is `21.1.2`.
 
 ```bash
 npm install -g @angular/cli@21.1.2
 ```
 
-For this project, we create a new application using `ng new my-app`
+For this project, we create a new application using `ng new first-app`.
+
+And here we are!
+
+First of all, let's run the application using `ng serve` to make sure it works, and then we'll move on to the next step.
+
+## Hello World!
+
+We have created a new application, let's modify it so it displays "Hello World!" instead of "Hello, first-app".
+
+src/app.html
+
+```html
+<title>Homes</title>
+```
+
+src/app.ts
+
+```ts
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  selector: 'app-root',
+  imports: [RouterOutlet],
+  // templateUrl: './lol.html',
+  template: ` <h1>Hello, {{ title() }}</h1>`,
+  styleUrl: './app.css',
+})
+export class App {
+  // title = 'LoL Face!!! hahahaa'
+  protected readonly title = signal('World!');
+}
+```
+
+## Add a Component
+
+We are going to add a Home component using an Angular generator. Try running:
+
+```bash
+ng generate component home
+```
+
+And then just confirm the app builds without any errors with `ng serve`.
+
+Now that we have a Home component with its appropriate files, let's use it in our app component. The first step is to import it, so we will want to add the import line to import the file, and we will add the Home component to the imports array in the @Component decorator.
+
+```ts
+// src/app.ts
+import { Home } from './home/home';
+// ...
+
+@Component({
+  imports: [RouterOutlet, Home],
+  //...
+})
+export class App {
+  //...
+}
+```
+
+And then we can use the Home component in our template.
+
+Since we can use it, we will now add it to the template in the `app.ts` file:
+
+```ts
+// src/app.ts
+// ...
+  template: `
+    <main>
+      <header class="brand-name">
+        <img class="brand-logo" src="/public/logo.svg" alt="logo" aria-hidden="true" />
+      </header>
+      <section class="content">
+        <app-home />
+      </section>
+    </main>`,
+
+// ...
+```
+
+And we should see the "home works!" text from the home component.
+
+Go ahead and add these global styles to `src/styles.css`:
+
+```css
+:root {
+  --primary-color: #605dc8;
+  --secondary-color: #8b89e6;
+  --accent-color: #e8e7fa;
+  --shadow-color: #e8e8e8;
+}
+button.primary {
+  padding: 10px;
+  border: solid 1px var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+}
+```
+
+## Add a Form
+
+In the home.ts file, we will add a form to the template.
+
+```ts
+// src/app/home/home.ts
+// ...
+  template: `
+    <section>
+      <form>
+        <input type="text" placeholder="Filter by city" />
+        <button class="primary" type="button">Search</button>
+      </form>
+    </section>
+  `,
+// ...
+```
+
+And add some CSS to `src/app/home/home.css`:
+
+```css
+.results {
+  display: grid;
+  column-gap: 14px;
+  row-gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 400px));
+  margin-top: 50px;
+  justify-content: space-around;
+}
+input[type='text'] {
+  border: solid 1px var(--primary-color);
+  padding: 10px;
+  border-radius: 8px;
+  margin-right: 4px;
+  display: inline-block;
+  width: 30%;
+}
+button {
+  padding: 10px;
+  border: solid 1px var(--primary-color);
+  background: var(--primary-color);
+  color: white;
+  border-radius: 8px;
+}
+@media (min-width: 500px) and (max-width: 768px) {
+  .results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  input[type='text'] {
+    width: 70%;
+  }
+}
+@media (max-width: 499px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+That's it! The application should work.
+
+## Exercise.
+
+Complete the steps as outlined above. Optionally, you may add other components, and use them in the App component. You may also wish to use `templateUrl` for separate HTML files rather than `template` as in this tutorial.
