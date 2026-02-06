@@ -9,7 +9,7 @@ import { Home } from './home/home';
   // template:`<h1>Hello, {{title()}}</h1>`,
   template:`<main>
       <header class="brand-name">
-        <img class="brand-logo" src="/public/logo.svg" alt="logo" aria-hidden="true" />
+        <img class="brand-logo" src="/logo.png" alt="logo" aria-hidden="true" />
       </header>
       <section class="content">
         <app-home />

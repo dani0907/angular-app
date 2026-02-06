@@ -184,3 +184,7 @@ That's it! The application should work.
 ## Exercise.
 
 Complete the steps as outlined above. Optionally, you may add other components, and use them in the App component. You may also wish to use `templateUrl` for separate HTML files rather than `template` as in this tutorial.
+
+## HousingLocation
+
+Let's generate a new component called `HousingLocation`.
