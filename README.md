@@ -188,3 +188,469 @@ Complete the steps as outlined above. Optionally, you may add other components, 
 ## HousingLocation
 
 Let's generate a new component called `HousingLocation`.
+
+```sh
+ng generate component housingLocation
+```
+
+Next, we want to import it into the Home component, so open up `app/home/home.ts` add the file import and the component import:
+
+```ts
+// app/home/home.ts
+// ...
+import { HousingLocation } from '../housing-location/housing-location';
+// ...
+  imports: [HousingLocation],
+// ...
+
+```
+
+And then we can use it in the template:
+
+```ts
+// app/home/home.ts
+
+// ...
+  template: `
+    <section>
+      <form>
+        <input type="text" placeholder="Filter by city" />
+        <button class="primary" type="button">Search</button>
+      </form>
+    </section>
+    <section class="results">
+      <app-housing-location />
+    </section>
+  `,
+ // ...
+```
+
+And add the styles to `housing-location.css`:
+
+```css
+.listing {
+  background: var(--accent-color);
+  border-radius: 30px;
+  padding-bottom: 30px;
+}
+.listing-heading {
+  color: var(--primary-color);
+  padding: 10px 20px 0 20px;
+}
+.listing-photo {
+  height: 250px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 30px 30px 0 0;
+}
+.listing-location {
+  padding: 10px 20px 20px 20px;
+}
+.listing-location::before {
+  content: url('/public/location-pin.svg') / '';
+}
+section.listing a {
+  padding-left: 20px;
+  text-decoration: none;
+  color: var(--primary-color);
+}
+section.listing a::after {
+  content: '\203A';
+  margin-left: 5px;
+}
+```
+
+## Creating an Angular Interface.
+
+If you want to read the CLI help menu specifically for generating an interface, the following command is useful:
+
+```
+ng --help generate interface
+```
+
+We'll use `ng generate` to generate a new interface. We want to generate an interface for `HousingLocation` which will create a new `housing-location.ts` file. We want this to be in our application's root directory. In our case, that is `first-app/`.
+
+```sh
+ng generate interface housingLocation
+```
+
+This will create a new file in `src/app/housing-location.ts` with the following contents:
+
+```ts
+export interface HousingLocation {}
+```
+
+If we import this as is to use in our `Home` component, we will have a naming collision, because `HousingLocation` is also the name of a component.
+
+To avoid this collision, we could add an alias, or just rename the interface. And that's what we'll do:
+
+```ts
+// src/app/housing-location.ts
+export interface HousingLocationInfo {
+  id: number;
+  name: string;
+  city: string;
+  state: string;
+  photo: string;
+  availableUnits: number;
+  wifi: boolean;
+  laundry: boolean;
+}
+```
+
+And then we can use it in our `Home` component:
+
+```ts
+// src/app/home/home.ts
+import { HousingLocationInfo } from '../housing-location';
+
+// ...
+
+export class Home {
+  housingLocation: HousingLocationInfo = {
+    id: 9999,
+    name: 'Test Home',
+    city: 'Test city',
+    state: 'ST',
+    photo: `${this.baseUrl}/example-house.jpg`,
+    availableUnits: 99,
+    wifi: true,
+    laundry: false,
+  };
+}
+```
+
+We are also adding a `baseUrl` property to the home component, so we can use it to construct the URL for the image. The `baseUrl` is `/` and then whichever directory the image is in. By default, we have assets in our `/public` directory, so `baseUrl` can be `/images` and will expect an `images/` directory in `public/`.
+
+Update `home.ts` to use the `housing-location` component:
+
+```ts
+// src/app/home/home.ts
+// ...
+  template: `
+    <section>
+      <form>
+        <input type="text" placeholder="Filter by city" />
+        <button class="primary" type="button">Search</button>
+      </form>
+    </section>
+    <section class="results">
+      <app-housing-location [housingLocation]="housingLocation" />
+    </section>
+  `,
+// ...
+```
+
+Note: We are using `[housingLocation]="housingLocation"`. This is syntax shows that we expect the value to come from a property on the component. This is known as "property binding."
+
+Finally, let's update the `HousingLocation` component (particularly the `template:` section) to look like a listing component:
+
+```ts
+// src/app/housing-location/housing-location.ts
+// ...
+  template: `
+    <section class="listing">
+      <img
+        class="listing-photo"
+        [src]="housingLocation().photo"
+        alt="Exterior photo of {{ housingLocation().name }}"
+        crossorigin
+      />
+      <h2 class="listing-heading">{{ housingLocation().name }}</h2>
+      <p class="listing-location">{{ housingLocation().city }}, {{ housingLocation().state }}</p>
+    </section>
+  `,
+// ...
+
+```
+
+Let's add some styles to our `housing-location.css` file:
+
+```css
+/* src/app/housing-location/housing-location.css */
+.listing {
+  background: var(--accent-color);
+  border-radius: 30px;
+  padding-bottom: 30px;
+}
+.listing-heading {
+  color: var(--primary-color);
+  padding: 10px 20px 0 20px;
+}
+.listing-photo {
+  height: 250px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 30px 30px 0 0;
+}
+.listing-location {
+  padding: 10px 20px 20px 20px;
+}
+.listing-location::before {
+  content: url('/public/location-pin.svg') / '';
+}
+
+section.listing a {
+  padding-left: 20px;
+  text-decoration: none;
+  color: var(--primary-color);
+}
+section.listing a::after {
+  content: '\203A';
+  margin-left: 5px;
+}
+```
+
+## `@for` Decorator.
+
+In Angular, we can use the `@for` decorator to loop over a list of items. This is similar to `*ngFor` in AngularJS, and kind of similar to JavaScript's `for` loop.
+
+In the class area of the `Home` component, let's modify the hard-coded single `housingLocation` into a list called `housingLocationList`.
+
+```ts
+// src/app/home/home.ts
+// ...
+
+export class Home {
+  // we use the angular.dev url so we can use the images hosted there...
+  readonly baseUrl = 'https://angular.dev/assets/images/tutorials/common';
+
+  housingLocationList: HousingLocationInfo[] = [
+    {
+      id: 0,
+      name: 'Acme Fresh Start Housing',
+      city: 'Chicago',
+      state: 'IL',
+      photo: `${this.baseUrl}/bernard-hermant-CLKGGwIBTaY-unsplash.jpg`,
+      availableUnits: 4,
+      wifi: true,
+      laundry: true,
+    },
+    {
+      id: 1,
+      name: 'A113 Transitional Housing',
+      city: 'Santa Monica',
+      state: 'CA',
+      photo: `${this.baseUrl}/brandon-griggs-wR11KBaB86U-unsplash.jpg`,
+      availableUnits: 0,
+      wifi: false,
+      laundry: true,
+    },
+    {
+      id: 2,
+      name: 'Warm Beds Housing Support',
+      city: 'Juneau',
+      state: 'AK',
+      photo: `${this.baseUrl}/i-do-nothing-but-love-lAyXdl1-Wmc-unsplash.jpg`,
+      availableUnits: 1,
+      wifi: false,
+      laundry: false,
+    },
+    {
+      id: 3,
+      name: 'Homesteady Housing',
+      city: 'Chicago',
+      state: 'IL',
+      photo: `${this.baseUrl}/ian-macdonald-W8z6aiwfi1E-unsplash.jpg`,
+      availableUnits: 1,
+      wifi: true,
+      laundry: false,
+    },
+    {
+      id: 4,
+      name: 'Happy Homes Group',
+      city: 'Gary',
+      state: 'IN',
+      photo: `${this.baseUrl}/krzysztof-hepner-978RAXoXnH4-unsplash.jpg`,
+      availableUnits: 1,
+      wifi: true,
+      laundry: false,
+    },
+    {
+      id: 5,
+      name: 'Hopeful Apartment Group',
+      city: 'Oakland',
+      state: 'CA',
+      photo: `${this.baseUrl}/r-architecture-JvQ0Q5IkeMM-unsplash.jpg`,
+      availableUnits: 2,
+      wifi: true,
+      laundry: true,
+    },
+    {
+      id: 6,
+      name: 'Seriously Safe Towns',
+      city: 'Oakland',
+      state: 'CA',
+      photo: `${this.baseUrl}/phil-hearing-IYfp2Ixe9nM-unsplash.jpg`,
+      availableUnits: 5,
+      wifi: true,
+      laundry: true,
+    },
+    {
+      id: 7,
+      name: 'Hopeful Housing Solutions',
+      city: 'Oakland',
+      state: 'CA',
+      photo: `${this.baseUrl}/r-architecture-GGupkreKwxA-unsplash.jpg`,
+      availableUnits: 2,
+      wifi: true,
+      laundry: true,
+    },
+    {
+      id: 8,
+      name: 'Seriously Safe Towns',
+      city: 'Oakland',
+      state: 'CA',
+      photo: `${this.baseUrl}/saru-robert-9rP3mxf8qWI-unsplash.jpg`,
+      availableUnits: 10,
+      wifi: false,
+      laundry: false,
+    },
+    {
+      id: 9,
+      name: 'Capital Safe Towns',
+      city: 'Portland',
+      state: 'OR',
+      photo: `${this.baseUrl}/webaliser-_TPTXZd9mOo-unsplash.jpg`,
+      availableUnits: 6,
+      wifi: true,
+      laundry: true,
+    },
+  ];
+}
+```
+
+Now that we have our list of `housingLocationList`, let's use the `@for` decorator in the template area of the same `Home` component.
+
+```ts
+// src/app/home/home.ts
+// ...
+  template: `
+    <section>
+      <form>
+        <input type="text" placeholder="Filter by city" />
+        <button class="primary" type="button">Search</button>
+      </form>
+    </section>
+    <section class="results">
+      @for (housingLocation in housingLocationList) {
+        <app-housing-location [housingLocation]="housingLocation" />
+      }
+    </section>
+  `,
+// ...
+```
+
+## Services
+
+Let's create a service. We will use the CLI to generate a service. First, let's try looking at the docks and then a `--dry-run` to see what it will do.
+
+Check the docs:
+
+```sh
+ng --help generate service
+```
+
+Do a dry run:
+
+```sh
+ng generate service housing --dry-run
+```
+
+As you can see, it generates a couple of files. One is the service and other is a "spec" which is another name for a test. Since we are not covering testing in this course, we can generate the service without the test.
+
+```sh
+ng generate service housing --skip-tests
+```
+
+That generates a `housing.ts` file in `src/app/housing.ts` for us. What we are going to do is take the `housingLocationList` out of our Home component, put it in the service, and then use Angular's Dependency Injection to hydrate the service into the Home component.
+
+Next, open up the `housing.ts` service and add the `housingLocationList`. You can just cut/paste from the Home component (note: we don't need it in the Home component anymore, which is why I stated "cut").
+
+We also add a couple of methods in the Housing service to interact with the data. One is to get a list of all the housing locations, and the other is to get one based on its id.
+
+So, our Housing service should end up looking like this:
+
+```js
+// src/app/ housing.ts
+import { Injectable } from '@angular/core';
+import { HousingLocationInfo } from './housing-location';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class Housing {
+  readonly baseUrl = 'https://angular.dev/assets/images/tutorials/common';
+  housingLocationList: HousingLocationInfo[] = [
+    {
+      id: 0,
+      name: 'Acme Fresh Start Housing',
+      city: 'Chicago',
+      state: 'IL',
+      photo: `${this.baseUrl}/bernard-hermant-CLKGGwIBTaY-unsplash.jpg`,
+      availableUnits: 4,
+      wifi: true,
+      laundry: true,
+    },
+    // ...
+  ];
+
+  getAllHousingLocations(): HousingLocationInfo[] {
+    return this.housingLocationList;
+  }
+
+  getHousingLocationById(id: number): HousingLocationInfo | undefined {
+    return this.housingLocationList.find(
+      (housingLocation) => housingLocation.id === id
+  );}
+}
+```
+
+Next, we want to use the Housing service in our Home component. To do this, we will use Angular's Dependency Injection. Which means we need to add `inject` to the imports.
+
+```ts
+import { Component, inject } from '@angular/core';
+```
+
+Then we declate an empty list for housing locations, and right after that we can use the `inject` function on the housing service.
+
+When the class constructor is called, we want the dependency injection to happen so we actually call inject inside the contructor. This means our Home component will look like this:
+
+```ts
+// src/app/home/home.ts
+import { Component, inject } from '@angular/core';
+import { HousingLocationInfo } from '../housing-location';
+import { Housing } from '../housing';
+
+@Component({
+  selector: 'app-home',
+  imports: [HousingLocation],
+  template: `
+    <section>
+      <form>
+        <input type="text" placeholder="Filter by city" />
+        <button class="primary" type="button">Search</button>
+      </form>
+    </section>
+    <section class="results">
+      @for (housingLocation of housingLocationList; track $index) {
+        <app-housing-location [housingLocation]="housingLocation" />
+      }
+    </section>
+  `,
+  styleUrl: './home.css',
+});
+
+export class Home {
+  housingLocationList: HousingLocationInfo[] = [];
+  housingService: Housing = inject(Housing);
+
+  constructor() {
+    this.housingLocationList = this.housingService.getAllHousingLocations();
+  }
+}
+
+```
+
+Run `ng serve` and make sure it still works.  
+
