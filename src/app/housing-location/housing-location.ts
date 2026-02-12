@@ -1,8 +1,9 @@
 import { Component, input} from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { HousingLocationInfo } from '../housinglocation';
 @Component({
   selector: 'app-housing-location',
-  imports: [],
+  imports: [RouterLink],
   standalone:true,
   // templateUrl: './housing-location.html',
   template:`
@@ -15,6 +16,7 @@ import { HousingLocationInfo } from '../housinglocation';
       />
       <h2 class="listing-heading">{{ housingLocation().name }}</h2>
       <p class="listing-location">{{ housingLocation().city }}, {{ housingLocation().state }}</p>
+      <p><a [routerLink]="['/details', housingLocation().id]">Learn More</a></p>
     </section>
   `,
   styleUrl: './housing-location.css',
